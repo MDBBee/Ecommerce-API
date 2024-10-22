@@ -1,0 +1,22 @@
+{
+  "name": "ecommerce-api",
+  "version": "1.0.0",
+  "description": "an api for an ecommerce app",
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon app.js"
+  },
+  "author": "Bobby Ugbebor",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-async-errors": "^3.1.1",
+    "http-status-codes": "^2.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.8.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
