@@ -9,6 +9,7 @@ const errorHandlerMiddleware = (err, req, res, next) => {
   };
 
   //Other conditions based on databaseErrors or other errors not coming from the controllers
+  // console.log(err);
 
   if (err.name === "ValidationError") {
     customError.msg = Object.values(err.errors)
