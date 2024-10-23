@@ -1,23 +1,34 @@
-const { UnauthenticatedError } = require("../errors/index");
-const jwt = require("jsonwebtoken");
+const customError = require("../errors");
+const { isTokenValid } = require("../utils");
 
-const authenticationMiddleware = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer "))
-    throw new UnauthenticatedError(
-      "Either no token or an invalid token received!!"
+//Authorizing all logged in users
+const authenticateUser = (req, res, next) => {
+  const token = req.signedCookies.token;
+  if (!token)
+    throw new customError.UnauthenticatedError(
+      "Not authorized, invalid token!!"
     );
 
-  const token = authHeader.split(" ")[1];
-
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = { userId: payload.userId, name: payload.name };
+    const { userId, name, role } = isTokenValid(token);
+    req.user = { userId, name, role };
     next();
   } catch (error) {
-    throw new UnauthenticatedError("Not authorized to access this resource!");
+    throw new customError.UnauthenticatedError(
+      "Not authorized, invalid token!!"
+    );
   }
 };
 
-module.exports = authenticationMiddleware;
+//Authorize admin user(s) only
+const authorizePermissions = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role))
+      throw new customError.UnauthorizedError(
+        "Not authorized to access this resource, admin only!!!"
+      );
+    next();
+  };
+};
+
+module.exports = { authenticateUser, authorizePermissions };

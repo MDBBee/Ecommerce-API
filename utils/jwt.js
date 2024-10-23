@@ -6,7 +6,7 @@ const createJWT = function ({ payload }) {
   });
 };
 
-const isTokenValid = function ({ token }) {
+const isTokenValid = function (token) {
   return jwt.verify(token, process.env.JWT_SECRET);
 };
 

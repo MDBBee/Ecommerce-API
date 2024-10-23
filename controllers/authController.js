@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const { StatusCodes } = require("http-status-codes");
 const customError = require("../errors/index");
-const { attachCookiesToResponse } = require("../utils");
+const { attachCookiesToResponse, createTokenUser } = require("../utils");
 
 const register = async (req, res) => {
   const { email, password, name } = req.body;
@@ -14,8 +14,8 @@ const register = async (req, res) => {
     throw new customError.BadRequestError("Duplicate Email.. !!");
 
   const user = await User.create({ name, email, password, role });
-  const tokenUser = { userId: user._id, name: user.name, role: user.role };
 
+  const tokenUser = createTokenUser(user);
   attachCookiesToResponse({ res, user: tokenUser });
 
   res.status(StatusCodes.CREATED).json({ user: tokenUser });
@@ -36,7 +36,7 @@ const login = async (req, res) => {
   if (!isPasswordCorrect)
     throw new customError.UnauthenticatedError("Invalid credentials");
 
-  const tokenUser = { userId: user._id, name: user.name, role: user.role };
+  const tokenUser = createTokenUser(user);
 
   attachCookiesToResponse({ res, user: tokenUser });
   res.status(StatusCodes.OK).json({ tokenUser });
