@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const { StatusCodes } = require("http-status-codes");
 const customError = require("../errors/index");
-const { createJWT, isTokenValid } = require("../utils");
+const { attachCookiesToResponse } = require("../utils");
 
 const register = async (req, res) => {
   const { email, password, name } = req.body;
@@ -15,22 +15,39 @@ const register = async (req, res) => {
 
   const user = await User.create({ name, email, password, role });
   const tokenUser = { userId: user._id, name: user.name, role: user.role };
-  const token = createJWT({ payload: tokenUser });
 
-  const oneDay = 1000 * 60 * 60 * 24;
-
-  res.cookie("token", token, {
-    httpOnly: true,
-    expires: new Date(Date.now() + oneDay),
-  });
+  attachCookiesToResponse({ res, user: tokenUser });
 
   res.status(StatusCodes.CREATED).json({ user: tokenUser });
 };
+
 const login = async (req, res) => {
-  res.send("login");
+  const { email, password } = req.body;
+
+  if (!email || !password)
+    throw new customError.BadRequestError(
+      "Please provide both email and password!!"
+    );
+
+  const user = await User.findOne({ email });
+  if (!user) throw new customError.UnauthenticatedError("Invalid credentials");
+
+  const isPasswordCorrect = await user.comparePW(password);
+  if (!isPasswordCorrect)
+    throw new customError.UnauthenticatedError("Invalid credentials");
+
+  const tokenUser = { userId: user._id, name: user.name, role: user.role };
+
+  attachCookiesToResponse({ res, user: tokenUser });
+  res.status(StatusCodes.OK).json({ tokenUser });
 };
+
 const logout = async (req, res) => {
-  res.send("logout");
+  res.cookie("token", "logout", {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  });
+  res.status(StatusCodes.OK).send("Logged out user");
 };
 
 module.exports = { register, login, logout };

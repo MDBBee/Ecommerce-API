@@ -6,10 +6,12 @@ const app = express();
 
 //other packages
 const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
 //Database
 const connectDB = require("./db/connect");
 //routers
 const authRouter = require("./routes/authRoutes");
+const userRouter = require("./routes/userRoutes");
 //Error middleWares
 const notFoundMiddleware = require("./middlewares/not-found");
 const errorhandlerMiddleware = require("./middlewares/error-handler");
@@ -17,12 +19,14 @@ const errorhandlerMiddleware = require("./middlewares/error-handler");
 //Express parsers
 app.use(morgan("tiny"));
 app.use(express.json());
+app.use(cookieParser(process.env.JWT_SECRET));
 
 app.get("/", (req, res) => {
   res.send("e-comerce api");
 });
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/users", userRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorhandlerMiddleware);
