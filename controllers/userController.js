@@ -1,6 +1,11 @@
 const User = require("../models/User");
 const { StatusCodes } = require("http-status-codes");
 const customError = require("../errors");
+const {
+  attachCookiesToResponse,
+  createTokenUser,
+  checkPermissions,
+} = require("../utils");
 
 const getAllUsers = async (req, res) => {
   const users = await User.find({}).select("-password");
@@ -9,6 +14,8 @@ const getAllUsers = async (req, res) => {
 
 const getSingleUser = async (req, res) => {
   const user = await User.findOne({ _id: req.params.id }).select("-password");
+
+  checkPermissions(req.user, user._id);
 
   if (!user)
     throw new customError.NotFoundError(
@@ -20,11 +27,25 @@ const getSingleUser = async (req, res) => {
 const showCurrentUser = async (req, res) => {
   res.status(StatusCodes.OK).json({ user: req.user });
 };
-const updateUser = async (req, res) => {
-  console.log("Yeah");
 
-  res.send("update");
+const updateUser = async (req, res) => {
+  const { name, email } = req.body;
+
+  if (!name || !email)
+    throw new customError.BadRequestError(
+      "Please provide both the old-password and the new-password!!"
+    );
+
+  const user = await User.findOne({ _id: req.user.userId });
+  user.email = email;
+  user.name = name;
+  await user.save();
+
+  const tokenUser = createTokenUser(user);
+  attachCookiesToResponse({ res, user: tokenUser });
+  res.status(StatusCodes.OK).json({ user: tokenUser });
 };
+
 const updateUserPassword = async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
@@ -53,3 +74,23 @@ module.exports = {
   updateUser,
   updateUserPassword,
 };
+
+// Using findOneAndUpdate Method....
+// const updateUser = async (req, res) => {
+//     const { name, email } = req.body;
+
+//     if (!name || !email)
+//       throw new customError.BadRequestError(
+//         "Please provide both the old-password and the new-password!!"
+//       );
+
+//     const user = await User.findOneAndUpdate(
+//       { _id: req.user.userId },
+//       { email, name },
+//       { new: true, runValidators: true }
+//     );
+
+//     const tokenUser = createTokenUser(user);
+//     attachCookiesToResponse({ res, user: tokenUser });
+//     res.status(StatusCodes.OK).json({ user: tokenUser });
+//   };
