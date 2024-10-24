@@ -8,7 +8,7 @@ const checkPermissions = (requestedUser, resourceUserId) => {
     return;
   else
     throw new customError.UnauthorizedError(
-      `You are not allowed access to another users' details!!... `
+      `Sorry ${requestedUser.name.toUpperCase()}, you are not allowed access to another users' details!!... `
     );
 };
 

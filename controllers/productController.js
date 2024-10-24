@@ -28,8 +28,6 @@ const getSingleProduct = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-  console.log(req.body);
-
   const { id: productId } = req.params;
   const product = await Product.findOneAndUpdate({ _id: productId }, req.body, {
     new: true,

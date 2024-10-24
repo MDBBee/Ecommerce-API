@@ -25,7 +25,7 @@ const authorizePermissions = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role))
       throw new customError.UnauthorizedError(
-        "Not authorized to access this resource, admin only!!!"
+        `Not authorized to access this resource, ${roles.join("")} only!!!`
       );
     next();
   };

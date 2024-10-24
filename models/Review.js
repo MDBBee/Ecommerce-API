@@ -1,3 +1,4 @@
+const { required } = require("joi");
 const mongoose = require("mongoose");
 
 const ReviewSchema = new mongoose.Schema(
@@ -6,6 +7,7 @@ const ReviewSchema = new mongoose.Schema(
       type: Number,
       min: 1,
       max: 5,
+      required: true,
     },
     title: {
       type: String,
