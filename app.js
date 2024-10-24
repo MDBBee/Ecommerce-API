@@ -7,6 +7,13 @@ const app = express();
 //other packages
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
+const fileUpload = require("express-fileupload");
+const cloudinary = require("cloudinary").v2;
+cloudinary.config({
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
+  cloud_name: process.env.CLOUD_NAME,
+});
 //Database
 const connectDB = require("./db/connect");
 //routers
@@ -21,6 +28,8 @@ const errorhandlerMiddleware = require("./middlewares/error-handler");
 app.use(morgan("tiny"));
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
+app.use(fileUpload());
+app.use(express.static("./public"));
 
 app.get("/", (req, res) => {
   res.send("e-comerce api");
