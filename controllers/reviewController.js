@@ -3,10 +3,10 @@ const Product = require("../models/Product");
 const CustomError = require("../errors");
 const { checkPermissions } = require("../utils");
 const { StatusCodes } = require("http-status-codes");
-const { findOneAndUpdate } = require("../models/User");
+const { find } = require("../models/User");
+
 const createReview = async (req, res) => {
   const { product: productId } = req.body;
-
   //Check if selected product is valid
   const prod = await Product.findOne({ _id: productId });
   if (!prod)
@@ -28,10 +28,18 @@ const createReview = async (req, res) => {
 
   res.status(StatusCodes.CREATED).json({ review });
 };
+
 const getAllReviews = async (req, res) => {
-  const reviews = await Review.find({});
+  const reviews = await Review.find({})
+    .populate({
+      path: "product",
+      select: "name company",
+    })
+    .populate({ path: "user", select: "name role" });
+
   res.status(StatusCodes.OK).json({ count: reviews.length, reviews });
 };
+
 const getSingleReview = async (req, res) => {
   const { id: reviewId } = req.params;
 
@@ -48,6 +56,8 @@ const updateReview = async (req, res) => {
 
   //Check if review exists!!
   const review = await Review.findOne({ _id: reviewId });
+  console.log("Helloooo", review);
+
   if (!review)
     throw new CustomError.BadRequestError(`No review with the id: ${reviewId}`);
 
@@ -78,10 +88,20 @@ const deleteReview = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: "Review successfully deleted!" });
 };
 
+const getProductReviews = async (req, res) => {
+  const { id: productId } = req.params;
+
+  const reviews = await Review.find({ product: productId })
+    .populate({ path: "user", select: "name" })
+    .populate({ path: "product", select: "name" });
+  res.status(StatusCodes.OK).json({ count: reviews.length, reviews });
+};
+
 module.exports = {
   createReview,
   getAllReviews,
   getSingleReview,
   updateReview,
   deleteReview,
+  getProductReviews,
 };
