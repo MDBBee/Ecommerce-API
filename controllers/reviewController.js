@@ -20,7 +20,7 @@ const createReview = async (req, res) => {
 
   if (alreadyReviewed)
     throw new CustomError.BadRequestError(
-      `Product has already been reviewed. You can only either delete or update/change your review.}`
+      `Product has already been reviewed by you!!. You can only either delete or update/change your review.}`
     );
 
   req.body.user = req.user.userId;
@@ -56,7 +56,6 @@ const updateReview = async (req, res) => {
 
   //Check if review exists!!
   const review = await Review.findOne({ _id: reviewId });
-  console.log("Helloooo", review);
 
   if (!review)
     throw new CustomError.BadRequestError(`No review with the id: ${reviewId}`);
