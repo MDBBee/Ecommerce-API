@@ -11,6 +11,7 @@ const {
   authenticateUser,
   authorizePermissions,
 } = require("../middlewares/authentication");
+const { checkPermissions } = require("../utils");
 
 router
   .route("/")
